@@ -6,7 +6,7 @@ int main(int argc, char** argv) {
     gtk_init(&argc, &argv);
 
     // make window
-    GtkWidget* window = gtk_window_new();
+    GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
     // setting of window
     gtk_window_set_title(GTK_WINDOW(window), "My title"); // title

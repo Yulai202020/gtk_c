@@ -134,7 +134,6 @@ void add_buttons(GtkWidget* box, char* list_to_add[], size_t len) {
         GtkWidget* button = gtk_button_new_with_label(label);
         g_signal_connect(button, "clicked", G_CALLBACK(on_button_clicked), NULL);
         gtk_box_pack_start(GTK_BOX(box), button, TRUE, TRUE, 0);
-
     }
 }
 

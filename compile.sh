@@ -1,0 +1,1 @@
+gcc -o window $1 `pkg-config --cflags --libs gtk+-3.0` -lm
