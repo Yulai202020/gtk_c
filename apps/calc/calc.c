@@ -6,93 +6,77 @@
 
 GtkWidget* entry;
 
-void skipWhitespace(const char** expr) {
-    while (isspace(**expr)) {
-        (*expr)++;
-    }
+#define MAX_EXPR_LEN 1024
+
+char available_items[] = "0123456789+-*/()";
+
+int precedence(char op) {
+    if(op == '+' || op == '-')
+        return 1;
+    if(op == '*' || op == '/')
+        return 2;
+    return 0;
 }
 
-double evaluateNumber(const char** expr) {
-    double num = 0.0;
-    while (isdigit(**expr) || **expr == '.') {
-        num = num * 10.0 + (**expr - '0');
-        (*expr)++;
+double applyOperation(double a, double b, char op) {
+    switch(op) {
+        case '+': return a + b;
+        case '-': return a - b;
+        case '*': return a * b;
+        case '/': return a / b;
     }
-    
-    if (**expr == '/') {
-        (*expr)++;
-        double denominator = evaluateNumber(expr);
-        if (denominator != 0) {
-            return num / denominator;
-        } else {
-            fprintf(stderr, "Error: Division by zero\n");
-            exit(EXIT_FAILURE);
-        }
-    }
-    
-    return num;
+    return 0;
 }
 
-double evaluateSubExpression(const char** expr) {
-    double result = 0.0;
-    double current_num = 0.0;
-    char operation = '+';
-    
-    while (**expr) {
-        skipWhitespace(expr);
-        
-        if (isdigit(**expr)) {
-            current_num = evaluateNumber(expr);
-        } else if (**expr == '(') {
-            (*expr)++; // Move past '('
-            current_num = evaluateSubExpression(expr);
-        } else if (**expr == '+' || **expr == '-' || **expr == '*' || **expr == '/') {
-            if (operation == '+') {
-                result += current_num;
-            } else if (operation == '-') {
-                result -= current_num;
-            } else if (operation == '*') {
-                result *= current_num;
-            } else if (operation == '/') {
-                if (current_num != 0.0) {
-                    result /= current_num;
-                } else {
-                    fprintf(stderr, "Error: Division by zero\n");
-                    exit(EXIT_FAILURE);
-                }
+double evaluateExpression(const char* expression) {
+    double values[MAX_EXPR_LEN];
+    char ops[MAX_EXPR_LEN];
+    int valTop = -1, opsTop = -1;
+
+    for(int i = 0; expression[i]; i++) {
+        if(expression[i] == ' ')
+            continue;
+
+        if(isdigit(expression[i]) || expression[i] == '.') {
+            char buffer[16];
+            int bufIndex = 0;
+
+            while(i < strlen(expression) && (isdigit(expression[i]) || expression[i] == '.')) {
+                buffer[bufIndex++] = expression[i++];
             }
-            operation = **expr;
-            (*expr)++;
-        } else if (**expr == ')') {
-            (*expr)++; // Move past ')'
-            break; // End of sub-expression
-        } else {
-            // Handle unexpected characters or syntax errors
-            break;
-        }
-    }
-    
-    // Final operation with the last number in the sub-expression
-    if (operation == '+') {
-        result += current_num;
-    } else if (operation == '-') {
-        result -= current_num;
-    } else if (operation == '*') {
-        result *= current_num;
-    } else if (operation == '/') {
-        if (current_num != 0.0) {
-            result /= current_num;
-        } else {
-            fprintf(stderr, "Error: Division by zero\n");
-            exit(EXIT_FAILURE);
-        }
-    }
-    
-    return result;
-}
+            buffer[bufIndex] = '\0';
+            i--;
 
-double evaluateExpression(const char* expr) {
-    return evaluateSubExpression(&expr);
+            values[++valTop] = atof(buffer);
+        } else if(expression[i] == '(') {
+            ops[++opsTop] = expression[i];
+        } else if(expression[i] == ')') {
+            while(opsTop != -1 && ops[opsTop] != '(') {
+                double val2 = values[valTop--];
+                double val1 = values[valTop--];
+                char op = ops[opsTop--];
+                values[++valTop] = applyOperation(val1, val2, op);
+            }
+            opsTop--; 
+        } else {
+            while(opsTop != -1 && precedence(ops[opsTop]) >= precedence(expression[i])) {
+                double val2 = values[valTop--];
+                double val1 = values[valTop--];
+                char op = ops[opsTop--];
+                values[++valTop] = applyOperation(val1, val2, op);
+            }
+            ops[++opsTop] = expression[i];
+        }
+    }
+
+    while(opsTop != -1) {
+        double val2 = values[valTop--];
+        double val1 = values[valTop--];
+        char op = ops[opsTop--];
+        values[++valTop] = applyOperation(val1, val2, op);
+    }
+
+    return values[valTop];
 }
 
 char* double_to_string(double number) {
@@ -120,6 +104,19 @@ static void on_button_clicked(GtkWidget* widget, gpointer data) {
         double result = evaluateExpression(text);
         char* result_str = double_to_string(result);
         gtk_entry_set_text(GTK_ENTRY(entry), result_str);
+        // int is_good = 1;
+        // for (int i = 0; expression[i]; i++) {
+        //     if (strchr(available_items, expression[i]) == NULL && !isspace(expression[i])) {
+        //         printf("Invalid symbol.\n");
+        //         is_good = 0;
+        //         break;
+        //     }
+        // }
+
+        // if (!is_good || strlen(expression) == 0) {
+        //     free(expression);
+        //     continue;
+        // }
         free(result_str);
     } else {
         char* new_text = stringSum(text, label);
