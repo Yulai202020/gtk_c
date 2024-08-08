@@ -81,7 +81,7 @@ double evaluateExpression(const char* expression) {
 
 char* double_to_string(double number) {
     // Allocate memory for the string representation
-    char* buffer = (char*)malloc(20 * sizeof(char)); // Assuming sufficient size for the number
+    char* buffer = (char*) malloc(20 * sizeof(char)); // Assuming sufficient size for the number
     
     if (buffer == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
