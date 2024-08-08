@@ -1,1 +1,1 @@
-gcc -o calc $1 `pkg-config --cflags --libs gtk+-3.0` -lm
+gcc -o calc $1 `pkg-config --cflags --libs gtk+-3.0` -lm -lstring

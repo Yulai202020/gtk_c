@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "string.c"
+#include <yulai/string.h> // its my library you can install it from my git https://github.com/Yulai202020/c_course in dir: my_libs/string.c
 
 GtkWidget* entry;
 
