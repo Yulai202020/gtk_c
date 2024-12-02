@@ -1,1 +1,1 @@
-gcc -o question $1 `pkg-config --cflags --libs gtk+-3.0` -lm -lreadline
+gcc -o question $1 `pkg-config --cflags --libs gtk+-3.0` -lm -lreadline -lstring

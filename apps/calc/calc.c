@@ -85,7 +85,7 @@ char* double_to_string(double number) {
     
     if (buffer == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
-        return 1; // Exit if malloc fails
+        exit(1); // Exit if malloc fails
     }
 
     // Convert double to string
